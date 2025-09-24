@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ReactJson from "react-json-view";
 
 export default function Home() {
   const [conversationData, setConversationData] = useState([]);
@@ -15,7 +16,10 @@ export default function Home() {
     };
     try {
       setQuery("");
-      setConversationData((prev) => [...prev, { who: "user", content: query }]);
+      setConversationData((prev) => [
+        ...prev,
+        { who: "user", content: query.trim() },
+      ]);
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -29,12 +33,13 @@ export default function Home() {
         throw new Error(`HTTP ${res.status} - ${res.statusText}\n${text}`);
       }
       const data = await res.json();
+      console.log("alooooooooooooooooooooo", data);
       setQuery("");
       setConversationData((prev) => [
         ...prev,
         {
           who: "agent",
-          content: JSON.stringify(data),
+          content: data.output,
         },
       ]);
     } catch (err) {
@@ -82,7 +87,7 @@ export default function Home() {
                   key={Math.random().toString()}
                   className="self-start bg-amber-50 p-2 rounded-lg w-2/3"
                 >
-                  {item.content}
+                  <ReactJson src={item.content} theme="monokai" collapsed={2} />
                 </div>
               );
             }
@@ -101,7 +106,7 @@ export default function Home() {
         {/* Input */}
         <footer className="p-4 border-t bg-white flex gap-2">
           <input
-            onChange={(event) => setQuery(event.target.value.trim())}
+            onChange={(event) => setQuery(event.target.value)}
             value={query}
             type="text"
             placeholder="Type a message..."
